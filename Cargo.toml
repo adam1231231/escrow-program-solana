@@ -10,3 +10,7 @@ solana-program = "1.14.10"
 thiserror = "1.0.37"
 spl-token = {version = "3.5.0", features = ["no-entrypoint"]}
 arrayref = "0.3.6"
+
+
+[lib]
+crate-type = ["cdylib", "lib"]
