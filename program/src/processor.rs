@@ -4,7 +4,7 @@ use solana_program::{
     msg,
     program::invoke,
     program_error::ProgramError,
-    program_pack::{IsInitialized, Pack},
+    program_pack::{ Pack},
     pubkey::Pubkey,
     sysvar::{rent::Rent, Sysvar},
 };
