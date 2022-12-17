@@ -1,0 +1,7 @@
+borsh_construct==0.1.0
+construct==2.10.68
+httpx==0.23.1
+mnemonic==0.20
+solana==0.28.1
+solders==0.10.0
+spl==0.0.1.dev0
