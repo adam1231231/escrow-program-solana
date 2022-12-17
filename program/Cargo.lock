@@ -369,6 +369,7 @@ name = "escrow-program"
 version = "0.1.0"
 dependencies = [
  "arrayref",
+ "borsh",
  "solana-program",
  "spl-token",
  "thiserror",

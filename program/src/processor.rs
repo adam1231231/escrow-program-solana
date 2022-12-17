@@ -21,8 +21,8 @@ impl Processor {
         accounts: &[AccountInfo],
         instruction_data: &[u8],
     ) -> ProgramResult {
+        msg!("Unpacking");
         let instruction = EscrowInstruction::unpack(instruction_data)?;
-
         match instruction {
             EscrowInstruction::InitEscrow { amount } => {
                 msg!("Instruction: InitEscrow");
@@ -40,6 +40,7 @@ impl Processor {
         amount: u64,
         program_id: &Pubkey,
     ) -> ProgramResult {
+        msg!("{:?}",accounts);
         let account_info_iter = &mut accounts.iter();
         let initializer = next_account_info(account_info_iter)?;
         if !initializer.is_signer {

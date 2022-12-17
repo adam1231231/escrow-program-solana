@@ -1,6 +1,8 @@
 use crate::errors::EscrowError::InvalidInstruction;
 use solana_program::program_error::ProgramError;
 use std::convert::TryInto;
+use solana_program::msg;
+use borsh::{BorshDeserialize, BorshSerialize};
 
 pub enum EscrowInstruction {
     /// Accounts expected:
@@ -36,20 +38,28 @@ pub enum EscrowInstruction {
     },
 }
 
+#[derive(BorshDeserialize, Debug)]
+struct Payload {
+    tag: u8,
+    amount: u64,
+}
+
 impl EscrowInstruction {
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
-        let (tag, rest) = input.split_first().ok_or(InvalidInstruction)?;
-        Ok(match tag {
-            0 => Self::InitEscrow {
-                amount: Self::unpack_amount(rest)?,
-            },
-            0 => Self::Exchange {
-                amount : Self::unpack_amount(rest)?,
+        msg!("splitting");
+        msg!("{:?}",&input);
+        msg!("===============================================================");
+        let payload : Payload = Payload::try_from_slice(input).unwrap();
+        Ok(match payload.tag {
+            0 => {msg!("{}",payload.amount); Self::InitEscrow { amount: payload.amount }},
+            1 => Self::Exchange {
+                amount : payload.amount,
             },
             _ => return Err(InvalidInstruction.into()),
         })
     }
     fn unpack_amount(input: &[u8]) -> Result<u64, ProgramError> {
+        msg!("unpacking amount");
         let amount = input
             .get(..8)
             .and_then(|slice| slice.try_into().ok())
