@@ -16,7 +16,7 @@ from mnemonic import Mnemonic
 from solana.system_program import CreateAccountParams, create_account, SYS_PROGRAM_ID
 import json
 from pprint import pprint as pp
-from solders.signature import Signature
+from solders.signature import Signature # type: ignore
 
 
 client = AsyncClient("http://localhost:8899", commitment=Confirmed)
@@ -48,8 +48,6 @@ async def setup():
     print("---creating x mint and accounts---")
     mint_x = await AsyncToken.create_mint(conn=client, payer=wallet_dab, decimals=9, mint_authority=wallet_dab.public_key,
                                freeze_authority=None, program_id=TOKEN_PROGRAM_ID)
-    print(mint_x.program_id)
-    print(mint_x.pubkey)
     keys["x_mint"] = str(mint_x.pubkey)
     dab_x_account = await  mint_x.create_account(wallet_dab.public_key)
     keys["dab_x_account"] = str(dab_x_account)

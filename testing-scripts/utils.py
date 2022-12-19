@@ -1,3 +1,4 @@
+from enum import IntEnum
 from solana.rpc.async_api import AsyncClient
 from solana.publickey import PublicKey
 from borsh_construct import CStruct, U8, U64  # type: ignore
@@ -56,3 +57,18 @@ class EscrowProgramClass:
     temp_token_account_pubkey : bytes
     initializer_token_to_receive_account_pubkey : bytes
     expected_amount : int
+ESCROW_ACCOUNT_SIZE = 1 + 32 + 32 + 32 + 8
+
+
+class EscrowInstructions(IntEnum):
+    INITIALIZE = 0
+    EXCHANGE = 1
+
+
+payload_schema = CStruct("instruction" / U8, "amount" / U64)
+
+
+def construct_payload(instruction_variant: EscrowInstructions, key: int):
+    return payload_schema.build({"instruction": instruction_variant, "amount": key})
+
+
