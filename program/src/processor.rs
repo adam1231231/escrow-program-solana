@@ -21,7 +21,6 @@ impl Processor {
         accounts: &[AccountInfo],
         instruction_data: &[u8],
     ) -> ProgramResult {
-        msg!("Unpacking");
         let instruction = EscrowInstruction::unpack(instruction_data)?;
         match instruction {
             EscrowInstruction::InitEscrow { amount } => {
@@ -40,7 +39,6 @@ impl Processor {
         amount: u64,
         program_id: &Pubkey,
     ) -> ProgramResult {
-        msg!("{:?}",accounts);
         let account_info_iter = &mut accounts.iter();
         let initializer = next_account_info(account_info_iter)?;
         if !initializer.is_signer {
@@ -99,30 +97,22 @@ impl Processor {
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
         let taker = next_account_info(account_info_iter)?;
-
         if !taker.is_signer {
             return Err(ProgramError::MissingRequiredSignature);
         }
-
         let takers_sending_token_account = next_account_info(account_info_iter)?;
-
         let takers_token_to_receive_account = next_account_info(account_info_iter)?;
-
         let pdas_temp_token_account = next_account_info(account_info_iter)?;
         let pdas_temp_token_account_info =
             TokenAccount::unpack(&pdas_temp_token_account.try_borrow_data()?)?;
         let (pda, bump_seed) = Pubkey::find_program_address(&[b"escrow"], program_id);
-
         if amount_expected_by_taker != pdas_temp_token_account_info.amount {
             return Err(EscrowError::ExpectedAmountMismatch.into());
         }
-
         let initializers_main_account = next_account_info(account_info_iter)?;
         let initializers_token_to_receive_account = next_account_info(account_info_iter)?;
         let escrow_account = next_account_info(account_info_iter)?;
-
         let escrow_info = Escrow::unpack(&escrow_account.try_borrow_data()?)?;
-
         if escrow_info.temp_token_account_pubkey != *pdas_temp_token_account.key {
             return Err(ProgramError::InvalidAccountData);
         }
@@ -138,7 +128,6 @@ impl Processor {
         }
 
         let token_program = next_account_info(account_info_iter)?;
-
         let transfer_to_initializer_ix = spl_token::instruction::transfer(
             token_program.key,
             takers_sending_token_account.key,

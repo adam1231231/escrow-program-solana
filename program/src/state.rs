@@ -13,6 +13,7 @@ impl IsInitialized for Escrow {
     }
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Escrow {
     pub is_initialized: bool,
     pub initializer_pubkey: Pubkey,

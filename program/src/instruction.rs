@@ -1,6 +1,5 @@
 use crate::errors::EscrowError::InvalidInstruction;
 use solana_program::program_error::ProgramError;
-use solana_program::msg;
 use borsh::{BorshDeserialize};
 
 pub enum EscrowInstruction {
@@ -45,12 +44,9 @@ struct Payload {
 
 impl EscrowInstruction {
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
-        msg!("splitting");
-        msg!("{:?}",&input);
-        msg!("===============================================================");
         let payload : Payload = Payload::try_from_slice(input).unwrap();
         Ok(match payload.tag {
-            0 => {msg!("{}",payload.amount); Self::InitEscrow { amount: payload.amount }},
+            0 => {Self::InitEscrow { amount: payload.amount }},
             1 => Self::Exchange {
                 amount : payload.amount,
             },

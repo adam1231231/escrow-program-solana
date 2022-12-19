@@ -1,5 +1,5 @@
 {
-    "program_id": "VsCzqfZJE8GXh5zWu1g1bJbCMJZpXCKYDLjybXuAfXb",
-    "expected_amount_from_initilized": 5,
-    "expected_amount_from_receiver": 10
+    "program_id": "4wB5MD766o6mKbhkDray6aj1mTtyqG5nt29xN439hzEz",
+    "initlizer_expected_ammount": 5,
+    "taker_expected_ammount": 10
 }
