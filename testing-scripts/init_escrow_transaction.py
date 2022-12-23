@@ -1,5 +1,4 @@
 from solana.rpc.async_api import AsyncClient
-from solana.rpc.api import Client
 import json
 from solana.system_program import create_account, CreateAccountParams
 from spl.token.constants import ACCOUNT_LEN, TOKEN_PROGRAM_ID
@@ -24,11 +23,12 @@ from utils import (
     EscrowInstructions,
 )
 from solders.pubkey import Pubkey  # type: ignore
+from pprint import pprint as pp
 
 
 async def init_escrow():
     """
-        Create a new escrow account and initialize it with the given parameters.
+    Create a new escrow account and initialize it with the given parameters.
     """
     client = AsyncClient("http://localhost:8899", commitment=Confirmed)
     with open("keys.json", "r") as read_file:
@@ -90,7 +90,9 @@ async def init_escrow():
             AccountMeta(
                 pubkey=temp_account_x.public_key, is_signer=False, is_writable=True
             ),
-            AccountMeta(pubkey=initializer_y_account, is_signer=False, is_writable=False),
+            AccountMeta(
+                pubkey=initializer_y_account, is_signer=False, is_writable=False
+            ),
             AccountMeta(
                 pubkey=escrow_keypair.public_key, is_signer=False, is_writable=True
             ),
@@ -108,12 +110,18 @@ async def init_escrow():
         init_escrow_ix,
     )
     print("------Sending all transactions to start the escrow------")
-    tx_hash = await client.send_transaction(
-        transaction,
-        Keypair.from_secret_key(bytes(keys["initializer_wallet_secret"].encode("latin-1"))),
-        escrow_keypair,
-        temp_account_x,
-    )
+    try:
+        tx_hash = await client.send_transaction(
+            transaction,
+            Keypair.from_secret_key(
+                bytes(keys["initializer_wallet_secret"].encode("latin-1"))
+            ),
+            escrow_keypair,
+            temp_account_x,
+        )
+    except Exception as e:
+        pp(e)
+        return
     await client.confirm_transaction(tx_hash.value)
     account_info: EscrowProgramClass = await get_account_info(
         escrow_keypair.public_key, ESCROW_ACCOUNT_SCHEMA, client
@@ -121,7 +129,9 @@ async def init_escrow():
     if not account_info.is_initialized:
         raise Exception("Escrow account not initialized")
     # comparing string to string since both aren't the same type, one from solders and the other from solana-py
-    elif str(Pubkey.from_bytes(account_info.initializer_pubkey)) != str(initializer_wallet):
+    elif str(Pubkey.from_bytes(account_info.initializer_pubkey)) != str(
+        initializer_wallet
+    ):
         raise Exception("initializer_pubkey not initialized with correct wallet")
     elif str(
         Pubkey.from_bytes(account_info.initializer_token_to_receive_account_pubkey)

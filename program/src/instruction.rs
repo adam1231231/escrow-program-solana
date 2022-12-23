@@ -1,6 +1,5 @@
 use crate::errors::EscrowError::InvalidInstruction;
 use solana_program::program_error::ProgramError;
-use borsh::{BorshDeserialize};
 
 pub enum EscrowInstruction {
     /// Accounts expected:
@@ -34,23 +33,40 @@ pub enum EscrowInstruction {
         /// The amount party B expects to receive of token X
         amount: u64,
     },
-}
-
-#[derive(BorshDeserialize, Debug)]
-struct Payload {
-    tag: u8,
-    amount: u64,
+    /// Cancels a trade
+    /// Accounts expected:
+    /// 0. `[signer]` The account of the person canceling the trade
+    /// 1. `[writable]` The PDA's temp token account to get tokens from and eventually close
+    /// 2. `[writable]` The initializer's token account that will receive tokens back
+    /// 3. `[writable]` The escrow account holding the escrow info
+    /// 4. `[]` The token program
+    /// 5. `[]` The PDA account
+    Cancel,
 }
 
 impl EscrowInstruction {
+    /// Unpacks a byte buffer into a [EscrowInstruction](enum.EscrowInstruction.html).
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
-        let payload : Payload = Payload::try_from_slice(input).unwrap();
-        Ok(match payload.tag {
-            0 => {Self::InitEscrow { amount: payload.amount }},
-            1 => Self::Exchange {
-                amount : payload.amount,
+        let (tag, rest) = input.split_first().ok_or(InvalidInstruction)?;
+
+        Ok(match tag {
+            0 => Self::InitEscrow {
+                amount: Self::unpack_amount(rest)?,
             },
+            1 => Self::Exchange {
+                amount: Self::unpack_amount(rest)?,
+            },
+            2 => Self::Cancel {},
             _ => return Err(InvalidInstruction.into()),
         })
+    }
+
+    fn unpack_amount(input: &[u8]) -> Result<u64, ProgramError> {
+        let amount = input
+            .get(..8)
+            .and_then(|slice| slice.try_into().ok())
+            .map(u64::from_le_bytes)
+            .ok_or(InvalidInstruction)?;
+        Ok(amount)
     }
 }

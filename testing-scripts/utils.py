@@ -72,3 +72,4 @@ def construct_payload(instruction_variant: EscrowInstructions, key: int):
     return payload_schema.build({"instruction": instruction_variant, "amount": key})
 
 
+cancel_payload = CStruct("instruction" / U8)
